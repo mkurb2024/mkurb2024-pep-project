@@ -27,7 +27,8 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.get("example-endpoint", this::exampleHandler);
-        app.post("/register", this::postAccountHandler);
+        app.post("/register", this::postAccountRegisterHandler);
+        app.post("/login", this::postAccountLoginHandler);
 
         return app;
     }
@@ -40,11 +41,11 @@ public class SocialMediaController {
         context.json("sample text");
     }
 
-    private void postAccountHandler(Context ctx) throws JsonProcessingException {
+    private void postAccountRegisterHandler(Context ctx) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
 
-        // Check if username is blank
+        // Check if the username is not blank, the password is at least 4 characters long, and an Account with that username does not already exist.
         if (account.getUsername() != "" && account.getPassword().length() >= 4 && accountService.getAccountByUsername(account.getUsername()) == null) {
             Account addedAccount = accountService.addAccount(account);
             if(addedAccount != null) {
@@ -52,6 +53,23 @@ public class SocialMediaController {
             }
         } else {
             ctx.status(400);
+        }
+    }
+
+    private void postAccountLoginHandler(Context ctx) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        Account loginInfo = mapper.readValue(ctx.body(), Account.class);
+
+        String username = loginInfo.getUsername();
+        String password = loginInfo.getPassword();
+
+        Account existingAcct = accountService.getAccountByUsername(username);
+        // check if user and password exists in the database
+        if(existingAcct != null && existingAcct.getPassword().equals(password)) {
+                ctx.json(mapper.writeValueAsString(existingAcct)).status(200);
+        } else {
+            ctx.status(401);
         }
     }
 
