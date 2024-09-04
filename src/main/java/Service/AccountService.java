@@ -22,4 +22,8 @@ public class AccountService {
         return accountDAO.getAccountByUsername(username);
     }
 
+    public Account getAccountById(int account_id) {
+        return accountDAO.getAccountById(account_id);
+    }
+
 }
