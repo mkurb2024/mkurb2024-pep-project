@@ -1,5 +1,7 @@
 package Controller;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,6 +36,7 @@ public class SocialMediaController {
         app.post("/register", this::postAccountRegisterHandler);
         app.post("/login", this::postAccountLoginHandler);
         app.post("/messages", this::postMessageHandler);
+        app.get("/messages", this::getAllMessagesHandler);
 
         return app;
     }
@@ -93,6 +96,15 @@ public class SocialMediaController {
             }
         } else {
             ctx.status(400);
+        }
+    }
+
+    public void getAllMessagesHandler(Context ctx) {
+        List<Message> messages = messageService.getAllMessages();
+        if(messages != null) {
+            ctx.json(messages).status(200);
+        } else {
+            ctx.status(500);
         }
     }
 
